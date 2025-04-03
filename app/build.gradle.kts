@@ -41,6 +41,9 @@ dependencies {
     implementation(":feature:camera")
     implementation(":feature:gallery")
 
+    implementation(project.dependencies.platform(libs.koin.bom))
+    implementation(libs.koin.core)
+    implementation(libs.koin.android)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
