@@ -1,6 +1,7 @@
 import android.app.Application
-import com.miguel.economic.data.di.koinModuleData
+import com.miguel.economic.data.di.koinDataModule
 import com.miguel.economic.domain.di.koinDomainModule
+import com.miguel.economic.gallery.di.koinGalleryModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -10,8 +11,9 @@ internal fun Application.initKoin() {
         androidLogger()
         androidContext(this@initKoin)
         modules(
-            koinModuleData(),
-            koinDomainModule()
+            koinDataModule(),
+            koinDomainModule(),
+            koinGalleryModule()
         )
     }
 }

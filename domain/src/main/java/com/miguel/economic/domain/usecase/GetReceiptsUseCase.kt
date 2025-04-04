@@ -1,15 +1,16 @@
 package com.miguel.economic.domain.usecase
 
 import com.miguel.economic.domain.model.ReceiptModel
-import com.miguel.economic.domain.repository.PhotoRepository
 import com.miguel.economic.domain.repository.ReceiptRepository
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 
 class GetReceiptsUseCase(
-    private val photoRepository: PhotoRepository,
-    private val receiptRepository: ReceiptRepository
+    private val receiptRepository: ReceiptRepository,
+    private val dispatcher: CoroutineDispatcher
 ) {
 
-    operator fun invoke(): List<ReceiptModel> {
-        return emptyList() //TODO: implement
+    suspend operator fun invoke(): List<ReceiptModel> = withContext(dispatcher) {
+        receiptRepository.getReceipts()
     }
 }
