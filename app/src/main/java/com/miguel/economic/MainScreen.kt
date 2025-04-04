@@ -1,6 +1,8 @@
 package com.miguel.economic
 
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -14,6 +16,7 @@ internal fun MainScreen() {
     val navController = rememberNavController()
 
     NavHost(
+        modifier = Modifier.safeDrawingPadding(),
         navController = navController,
         startDestination = GalleryDestination
     ) {

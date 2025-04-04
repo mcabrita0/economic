@@ -26,6 +26,7 @@ koin-core = { module = "io.insert-koin:koin-core" }
 koin-android = { module = "io.insert-koin:koin-android" }
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
 compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
+compose-material = { group = "androidx.compose.material", name = "material" }
 compose-ui = { group = "androidx.compose.ui", name = "ui-android" }
 navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
 serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization-json" }
