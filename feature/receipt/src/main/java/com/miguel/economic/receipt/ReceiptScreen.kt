@@ -2,6 +2,7 @@ package com.miguel.economic.receipt
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -23,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -60,13 +62,14 @@ fun ReceiptScreen(
 
     val uiState by viewModel.uiState.collectAsState()
 
-    when (val state = uiState) {
-        is ReceiptUiState.Loading -> {
+    Box(modifier = Modifier.background(Color.White)) {
 
-        }
+        when (val state = uiState) {
+            is ReceiptUiState.Loading -> {
 
-        is ReceiptUiState.Success -> {
-            Box {
+            }
+
+            is ReceiptUiState.Success -> {
                 Column(
                     modifier = Modifier.fillMaxSize()
                 ) {

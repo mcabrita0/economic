@@ -1,18 +1,16 @@
 package com.miguel.economic.gallery.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -27,16 +25,11 @@ internal fun GalleryItem(
     modifier: Modifier = Modifier,
     data: ReceiptViewData
 ) {
-    Row(
-        modifier = Modifier
-            .padding(all = 4.dp)
-            .fillMaxWidth()
-            .background(Color.White)
-            .then(modifier)
-    ) {
+    Row(modifier = modifier) {
         AsyncImage(
-            modifier = Modifier.size(100.dp),
+            modifier = Modifier.size(120.dp),
             model = data.photoFilename,
+            contentScale = ContentScale.FillWidth,
             contentDescription = null,
             placeholder = if (LocalInspectionMode.current) {
                 rememberVectorPainter(ImageVector.vectorResource(R.drawable.ic_image_placeholder))
