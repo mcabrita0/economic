@@ -28,6 +28,13 @@ dependencies {
 
     debugImplementation(libs.androidx.uitooling)
     debugImplementation(libs.androidx.uitooling.preview)
+
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    testImplementation(libs.coroutines.test)
+    testImplementation(libs.mockk)
+    testImplementation(libs.mockk.android)
+    testImplementation(libs.turbine)
 }
 
 android {
