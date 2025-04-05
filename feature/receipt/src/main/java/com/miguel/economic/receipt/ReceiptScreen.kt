@@ -30,6 +30,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -66,7 +67,7 @@ fun ReceiptScreen(
             }
 
             is ReceiptViewEvent.SaveAndExit -> {
-                Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, R.string.saved, Toast.LENGTH_SHORT).show()
                 onNavigate(GalleryDestination)
             }
 
@@ -75,7 +76,9 @@ fun ReceiptScreen(
             }
 
             is ReceiptViewEvent.Error -> {
-                Toast.makeText(context, "ERROR: ${event.message}", Toast.LENGTH_SHORT).show()
+                val error = context.getString(event.message)
+                val message = context.getString(R.string.error_toast, error)
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -86,7 +89,11 @@ fun ReceiptScreen(
 
         when (val state = uiState) {
             is ReceiptUiState.Loading -> {
-                // TODO: do
+                Text(
+                    modifier = Modifier.align(Alignment.Center),
+                    text = stringResource(R.string.loading),
+                    fontSize = 24.sp
+                )
             }
 
             is ReceiptUiState.Success -> {
@@ -147,7 +154,7 @@ fun ReceiptScreen(
                         text = if (state.receipt.amount.isNotEmpty() && state.receipt.currencyCode.isNotEmpty()) {
                             state.receipt.formattedAmount
                         } else {
-                            "No currency"
+                            stringResource(R.string.no_currency)
                         },
                         fontSize = 32.sp
                     )
@@ -155,7 +162,7 @@ fun ReceiptScreen(
                     if (state.receipt.createdDate != null) {
                         Row(modifier = Modifier.padding(all = 8.dp)) {
                             Text(
-                                text = "Created",
+                                text = stringResource(R.string.created),
                                 fontWeight = FontWeight.Bold
                             )
 
@@ -186,7 +193,7 @@ fun ReceiptScreen(
                             .fillMaxWidth(),
                         onClick = viewModel::onClickSave
                     ) {
-                        Text(text = "Save")
+                        Text(text = stringResource(R.string.save))
                     }
                 }
             }

@@ -3,6 +3,7 @@ package com.miguel.economic.receipt
 import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.miguel.economic.core.R
 import com.miguel.economic.core.navigation.ReceiptDestination
 import com.miguel.economic.core.util.CurrencyUtil
 import com.miguel.economic.domain.usecase.CreateOrUpdateReceiptUseCase
@@ -85,9 +86,9 @@ internal class ReceiptViewModel(
                 _viewEvent.send(ReceiptViewEvent.SaveAndExit)
             } else {
                 val errorMessage = when {
-                    receipt.photoFilename == null -> "No photo taken"
-                    receipt.amount.isEmpty() || receipt.currencyCode.isEmpty() -> "No currency"
-                    receipt.createdDate == null -> "No date set"
+                    receipt.photoFilename == null -> R.string.error_no_photo
+                    receipt.amount.isEmpty() || receipt.currencyCode.isEmpty() -> R.string.error_no_currency
+                    receipt.createdDate == null -> R.string.error_no_date
                     else -> null
                 }
 
@@ -99,28 +100,32 @@ internal class ReceiptViewModel(
     }
 
     fun onClickCurrency() {
-        val receipt = (_uiState.value as? ReceiptUiState.Success)?.receipt ?: return
+        viewModelScope.launch(ioDispatcher) {
+            val receipt = (_uiState.value as? ReceiptUiState.Success)?.receipt ?: return@launch
 
-        _currencyDialogUiState.value = CurrencyDialogUiState.Show(
-            currencyCodes = CurrencyUtil.allCurrencyCodes(),
-            currencyCode = receipt.currencyCode,
-            amount = receipt.amount
-        )
+            _currencyDialogUiState.value = CurrencyDialogUiState.Show(
+                currencyCodes = CurrencyUtil.allCurrencyCodes(),
+                currencyCode = receipt.currencyCode,
+                amount = receipt.amount
+            )
+        }
     }
 
     fun onCurrencyDialogDismiss() {
-        val update = _currencyDialogUiState.value as? CurrencyDialogUiState.Show ?: return
+        viewModelScope.launch(ioDispatcher) {
+            val update = _currencyDialogUiState.value as? CurrencyDialogUiState.Show ?: return@launch
 
-        _uiState.update {
-            (it as? ReceiptUiState.Success)?.copy(
-                receipt = it.receipt.copy(
-                    amount = update.amount,
-                    currencyCode = update.currencyCode
-                )
-            ) ?: it
+            _uiState.update {
+                (it as? ReceiptUiState.Success)?.copy(
+                    receipt = it.receipt.copy(
+                        amount = update.amount,
+                        currencyCode = update.currencyCode
+                    )
+                ) ?: it
+            }
+
+            _currencyDialogUiState.value = CurrencyDialogUiState.Hide
         }
-
-        _currencyDialogUiState.value = CurrencyDialogUiState.Hide
     }
 
     fun onCurrencyAmountChange(amount: String) {

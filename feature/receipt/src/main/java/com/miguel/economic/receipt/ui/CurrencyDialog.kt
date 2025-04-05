@@ -17,9 +17,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.miguel.economic.core.R
 import com.miguel.economic.core.util.CurrencyUtil
 import com.miguel.economic.receipt.model.CurrencyDialogUiState
 
@@ -33,7 +35,7 @@ internal fun CurrencyDialog(
     Column(modifier = modifier) {
         Text(
             modifier = Modifier.padding(top = 8.dp, start = 16.dp),
-            text = "Amount"
+            text = stringResource(R.string.amount)
         )
 
         TextField(
