@@ -1,11 +1,13 @@
 package com.miguel.economic.receipt
 
+import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.miguel.economic.core.navigation.ReceiptDestination
+import com.miguel.economic.domain.usecase.CreateOrUpdateReceiptUseCase
 import com.miguel.economic.domain.usecase.CreatePhotoFileUseCase
-import com.miguel.economic.domain.usecase.CreateReceiptUseCase
 import com.miguel.economic.domain.usecase.GetReceiptUseCase
+import com.miguel.economic.receipt.mapper.toModel
 import com.miguel.economic.receipt.mapper.toViewData
 import com.miguel.economic.receipt.model.ReceiptUiState
 import com.miguel.economic.receipt.model.ReceiptViewData
@@ -19,10 +21,11 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.LocalDateTime
 
 internal class ReceiptViewModel(
     private val args: ReceiptDestination,
-    private val createReceiptUseCase: CreateReceiptUseCase,
+    private val createOrUpdateReceiptUseCase: CreateOrUpdateReceiptUseCase,
     private val createPhotoFileUseCase: CreatePhotoFileUseCase,
     private val getReceiptUseCase: GetReceiptUseCase,
     private val ioDispatcher: CoroutineDispatcher
@@ -66,6 +69,17 @@ internal class ReceiptViewModel(
         }
     }
 
+    fun onClickSave() {
+        viewModelScope.launch(ioDispatcher) {
+            createOrUpdateReceiptUseCase(
+                receipt = (_uiState.value as? ReceiptUiState.Success)?.receipt?.toModel(id = args.receiptId) ?: return@launch
+            )
+
+            _viewEvent.send(ReceiptViewEvent.SaveAndExit)
+        }
+    }
+
+    @SuppressLint("NewApi")
     fun onPhotoTaken(success: Boolean) {
         val filename = pendingPhotoFilename
 
@@ -78,7 +92,10 @@ internal class ReceiptViewModel(
             _uiState.update {
                 val state = it as? ReceiptUiState.Success
                 state?.copy(
-                    receipt = state.receipt.copy(photoFilename = pendingPhotoFilename)
+                    receipt = state.receipt.copy(
+                        photoFilename = pendingPhotoFilename,
+                        createdDate = LocalDateTime.now()
+                    ),
                 ) ?: it
             }
 

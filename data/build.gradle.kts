@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.ksp)
 }
 
 dependencies {
@@ -10,6 +11,10 @@ dependencies {
     implementation(libs.koin.core)
 
     implementation(libs.androidx.core)
+
+    implementation(libs.room)
+    ksp(libs.room.compiler)
+    implementation(libs.room.ktx)
 }
 
 android {

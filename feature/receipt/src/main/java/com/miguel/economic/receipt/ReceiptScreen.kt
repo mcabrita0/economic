@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Button
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
@@ -97,7 +98,7 @@ fun ReceiptScreen(
                         listOf(
                             "Amount" to state.receipt.amount?.toString().orEmpty(),
                             "Currency" to state.receipt.currencyCode.orEmpty(),
-                            "Created" to state.receipt.createdDate.orEmpty()
+                            "Created" to state.receipt.formattedDate
                         )
                     }
 
@@ -110,23 +111,31 @@ fun ReceiptScreen(
                     }
                 }
 
+                Column(modifier = Modifier.align(Alignment.BottomEnd)) {
+                    FloatingActionButton(
+                        modifier = Modifier
+                            .align(Alignment.End)
+                            .padding(16.dp),
+                        onClick = viewModel::onClickPhoto
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_camera),
+                            contentDescription = null
+                        )
+                    }
 
-                FloatingActionButton(
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(16.dp),
-                    onClick = viewModel::onClickPhoto
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_camera),
-                        contentDescription = null
-                    )
+                    Button(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .fillMaxWidth(),
+                        onClick = viewModel::onClickSave
+                    ) {
+                        Text(text = "Save")
+                    }
                 }
             }
         }
     }
-
-
 }
 
 @Composable

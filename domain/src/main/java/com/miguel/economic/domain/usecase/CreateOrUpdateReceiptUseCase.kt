@@ -5,12 +5,12 @@ import com.miguel.economic.domain.repository.ReceiptRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
-class GetReceiptUseCase(
+class CreateOrUpdateReceiptUseCase(
     private val receiptRepository: ReceiptRepository,
     private val dispatcher: CoroutineDispatcher
 ) {
 
-    suspend operator fun invoke(id: Int): ReceiptModel = withContext(dispatcher) {
-        receiptRepository.getReceipt(id)
+    suspend operator fun invoke(receipt: ReceiptModel) = withContext(dispatcher) {
+        receiptRepository.createOrUpdateReceipt(receipt)
     }
 }

@@ -1,5 +1,6 @@
 package com.miguel.economic.data.di
 
+import com.miguel.economic.data.datasource.local.ReceiptLocalDataSource
 import com.miguel.economic.data.repository.CameraRepositoryImpl
 import com.miguel.economic.data.repository.ReceiptRepositoryImpl
 import com.miguel.economic.domain.repository.CameraRepository
@@ -11,4 +12,5 @@ import org.koin.dsl.module
 fun koinDataModule() = module {
     singleOf(::ReceiptRepositoryImpl) { bind<ReceiptRepository>() }
     singleOf(::CameraRepositoryImpl) { bind<CameraRepository>() }
+    singleOf(::ReceiptLocalDataSource)
 }

@@ -42,8 +42,10 @@ internal class GalleryViewModel(
     }
 
     fun onClickReceipt(item: ReceiptViewData) {
-        viewModelScope.launch(ioDispatcher) {
-            _viewEvent.send(NavigateReceipt(receiptId = item.id))
+        if (item.id != null) {
+            viewModelScope.launch(ioDispatcher) {
+                _viewEvent.send(NavigateReceipt(receiptId = item.id))
+            }
         }
     }
 

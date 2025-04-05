@@ -5,7 +5,7 @@ import androidx.core.content.FileProvider
 import com.miguel.economic.domain.repository.CameraRepository
 import java.io.File
 
-class CameraRepositoryImpl(
+internal class CameraRepositoryImpl(
     private val context: Context
 ) : CameraRepository {
 

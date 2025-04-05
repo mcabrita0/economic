@@ -1,30 +1,29 @@
 package com.miguel.economic.data.repository
 
+import com.miguel.economic.data.datasource.local.ReceiptLocalDataSource
+import com.miguel.economic.data.mapper.toDbModel
+import com.miguel.economic.data.mapper.toModel
 import com.miguel.economic.domain.model.ReceiptModel
 import com.miguel.economic.domain.repository.ReceiptRepository
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 
-internal class ReceiptRepositoryImpl : ReceiptRepository {
+internal class ReceiptRepositoryImpl(
+    private val receiptLocalDataSource: ReceiptLocalDataSource,
+    private val dispatcher: CoroutineDispatcher
+) : ReceiptRepository {
 
-    override fun getReceipts(): List<ReceiptModel> {
-        return ReceiptModel(
-            photoFilename = "",
-            amount = 100,
-            currencyCode = "EUR",
-            createdDate = "2025-04-04 10:10"
-        ).let { item ->
-            (0 until 100).map { item }
+    override suspend fun getReceipts(): List<ReceiptModel> = withContext(dispatcher) {
+        receiptLocalDataSource.getAll().map {
+            it.toModel()
         }
     }
 
-    override fun getReceipt(id: Int): ReceiptModel {
-        TODO("Not yet implemented")
+    override suspend fun getReceipt(id: Int): ReceiptModel = withContext(dispatcher) {
+        receiptLocalDataSource.get(id).toModel()
     }
 
-    override fun createReceipt(receipt: ReceiptModel) {
-        TODO("Not yet implemented")
-    }
-
-    override fun updateReceipt(receipt: ReceiptModel) {
-        TODO("Not yet implemented")
+    override suspend fun createOrUpdateReceipt(receipt: ReceiptModel) = withContext(dispatcher) {
+        receiptLocalDataSource.insertOrUpdate(receipt.toDbModel())
     }
 }

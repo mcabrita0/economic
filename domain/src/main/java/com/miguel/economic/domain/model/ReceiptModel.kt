@@ -1,14 +1,11 @@
 package com.miguel.economic.domain.model
 
+import java.time.LocalDateTime
+
 data class ReceiptModel(
-    val id: Int = ID_CREATE,
+    val id: Int? = null,
     val photoFilename: String,
     val amount: Int,
     val currencyCode: String,
-    val createdDate: String // TODO: localdatetime
-) {
-
-    companion object {
-        const val ID_CREATE = -1
-    }
-}
+    val createdDate: LocalDateTime
+)

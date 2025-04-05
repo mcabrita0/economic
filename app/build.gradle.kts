@@ -32,6 +32,8 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -49,6 +51,8 @@ dependencies {
     implementation(project(":data"))
     implementation(project(":feature:receipt"))
     implementation(project(":feature:gallery"))
+
+    coreLibraryDesugaring(libs.corelibrarydesugar)
 
     implementation(project.dependencies.platform(libs.koin.bom))
     implementation(libs.koin.core)
