@@ -6,10 +6,11 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.miguel.economic.camera.CameraScreen
-import com.miguel.economic.core.navigation.CameraDestination
+import androidx.navigation.toRoute
 import com.miguel.economic.core.navigation.GalleryDestination
+import com.miguel.economic.core.navigation.ReceiptDestination
 import com.miguel.economic.gallery.GalleryScreen
+import com.miguel.economic.receipt.ReceiptScreen
 
 @Composable
 internal fun MainScreen() {
@@ -24,8 +25,12 @@ internal fun MainScreen() {
             GalleryScreen(onNavigate = navController::navigate)
         }
 
-        composable<CameraDestination> {
-            CameraScreen(onNavigate = navController::navigate)
+        composable<ReceiptDestination> {
+            val args = it.toRoute<ReceiptDestination>()
+            ReceiptScreen(
+                args = args,
+                onNavigate = navController::navigate
+            )
         }
     }
 }

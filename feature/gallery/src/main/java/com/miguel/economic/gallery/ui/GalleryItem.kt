@@ -19,25 +19,27 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import com.miguel.economic.gallery.R
-import com.miguel.economic.gallery.model.GalleryItemViewData
+import com.miguel.economic.core.R
+import com.miguel.economic.gallery.model.ReceiptViewData
 
 @Composable
 internal fun GalleryItem(
-    data: GalleryItemViewData
+    modifier: Modifier = Modifier,
+    data: ReceiptViewData
 ) {
     Row(
         modifier = Modifier
             .padding(all = 4.dp)
             .fillMaxWidth()
             .background(Color.White)
+            .then(modifier)
     ) {
         AsyncImage(
             modifier = Modifier.size(100.dp),
             model = data.photoFilename,
             contentDescription = null,
             placeholder = if (LocalInspectionMode.current) {
-                rememberVectorPainter(ImageVector.vectorResource(R.drawable.ic_test))
+                rememberVectorPainter(ImageVector.vectorResource(R.drawable.ic_image_placeholder))
             } else {
                 null
             }
@@ -66,7 +68,8 @@ internal fun GalleryItem(
 @Composable
 private fun GalleryItemPreview() {
     GalleryItem(
-        data = GalleryItemViewData(
+        data = ReceiptViewData(
+            id = -1,
             photoFilename = "",
             amount = "100 €",
             createdDate = "04-04-2025 10:10"

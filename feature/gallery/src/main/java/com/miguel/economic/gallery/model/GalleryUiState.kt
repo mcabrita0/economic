@@ -3,13 +3,13 @@ package com.miguel.economic.gallery.model
 import androidx.compose.runtime.Immutable
 
 @Immutable
-sealed class GalleryViewData {
+internal sealed class GalleryUiState {
 
     @Immutable
-    data object Loading : GalleryViewData()
+    data object Loading : GalleryUiState()
 
     @Immutable
     data class Success(
-        val items: List<GalleryItemViewData>
-    ) : GalleryViewData()
+        val items: List<ReceiptViewData>
+    ) : GalleryUiState()
 }

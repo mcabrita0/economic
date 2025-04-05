@@ -17,10 +17,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.miguel.economic.core.compose.NavigationEffect
-import com.miguel.economic.core.navigation.CameraDestination
+import androidx.compose.ui.unit.sp
+import com.miguel.economic.core.compose.ViewEventEffect
 import com.miguel.economic.core.navigation.NavigationDestination
-import com.miguel.economic.gallery.model.GalleryViewData
+import com.miguel.economic.core.navigation.ReceiptDestination
+import com.miguel.economic.gallery.model.GalleryUiState
+import com.miguel.economic.gallery.model.GalleryViewEvent
 import com.miguel.economic.gallery.ui.GalleryItem
 import org.koin.androidx.compose.koinViewModel
 
@@ -32,30 +34,32 @@ fun GalleryScreen(
 
     val uiState by viewModel.uiState.collectAsState()
 
-    NavigationEffect(
-        source = viewModel.navigation,
-        onNavigate = onNavigate
-    )
+    ViewEventEffect(viewModel.viewEvent) { event ->
+        when (event) {
+            is GalleryViewEvent.NavigateCreateReceipt -> onNavigate(ReceiptDestination(receiptId = null))
+            is GalleryViewEvent.NavigateReceipt -> onNavigate(ReceiptDestination(receiptId = event.receiptId))
+        }
+    }
 
     Box {
         when (val state = uiState) {
-            is GalleryViewData.Loading -> {
+            is GalleryUiState.Loading -> {
                 Text(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clickable {
-                            onNavigate(CameraDestination)
-                        },
-                    text = "gallery"
+                    modifier = Modifier.align(Alignment.Center),
+                    text = "Loading",
+                    fontSize = 24.sp
                 )
             }
 
-            is GalleryViewData.Success -> {
+            is GalleryUiState.Success -> {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize()
                 ) {
                     items(state.items) { data ->
-                        GalleryItem(data = data)
+                        GalleryItem(
+                            modifier = Modifier.clickable { viewModel.onClickReceipt(data) },
+                            data = data
+                        )
                     }
                 }
             }

@@ -2,14 +2,15 @@ package com.miguel.economic.gallery
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.miguel.economic.core.navigation.CameraDestination
-import com.miguel.economic.core.navigation.NavigationDestination
 import com.miguel.economic.domain.model.ReceiptModel
 import com.miguel.economic.domain.usecase.GetReceiptsUseCase
 import com.miguel.economic.gallery.mapper.toViewData
-import com.miguel.economic.gallery.model.GalleryViewData
+import com.miguel.economic.gallery.model.GalleryUiState
+import com.miguel.economic.gallery.model.GalleryViewEvent
+import com.miguel.economic.gallery.model.GalleryViewEvent.NavigateCreateReceipt
+import com.miguel.economic.gallery.model.GalleryViewEvent.NavigateReceipt
+import com.miguel.economic.gallery.model.ReceiptViewData
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,13 +23,11 @@ internal class GalleryViewModel(
     private val ioDispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<GalleryViewData>(GalleryViewData.Loading)
+    private val _uiState = MutableStateFlow<GalleryUiState>(GalleryUiState.Loading)
     val uiState = _uiState.asStateFlow()
 
-    private val _navigation = Channel<NavigationDestination>()
-    val navigation = _navigation.receiveAsFlow()
-
-    private var clickAddReceiptJob: Job? = null
+    private val _viewEvent = Channel<GalleryViewEvent>()
+    val viewEvent = _viewEvent.receiveAsFlow()
 
     init {
         viewModelScope.launch {
@@ -37,18 +36,20 @@ internal class GalleryViewModel(
     }
 
     fun onClickAddReceipt() {
-        if (clickAddReceiptJob?.isActive == true) {
-            return
+        viewModelScope.launch(ioDispatcher) {
+            _viewEvent.send(NavigateCreateReceipt)
         }
+    }
 
-        clickAddReceiptJob = viewModelScope.launch {
-            _navigation.send(CameraDestination)
+    fun onClickReceipt(item: ReceiptViewData) {
+        viewModelScope.launch(ioDispatcher) {
+            _viewEvent.send(NavigateReceipt(receiptId = item.id))
         }
     }
 
     private suspend fun loadReceipts() = withContext(ioDispatcher) {
-        _uiState.value = GalleryViewData.Loading
-        _uiState.value = GalleryViewData.Success(
+        _uiState.value = GalleryUiState.Loading
+        _uiState.value = GalleryUiState.Success(
             items = getReceiptsUseCase().map(ReceiptModel::toViewData)
         )
     }

@@ -7,4 +7,8 @@ interface ReceiptRepository {
     fun getReceipts(): List<ReceiptModel>
 
     fun getReceipt(id: Int): ReceiptModel
+
+    fun createReceipt(receipt: ReceiptModel)
+
+    fun updateReceipt(receipt: ReceiptModel)
 }

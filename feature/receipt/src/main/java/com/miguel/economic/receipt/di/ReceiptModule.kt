@@ -1,12 +1,12 @@
-package com.miguel.economic.gallery.di
+package com.miguel.economic.receipt.di
 
-import com.miguel.economic.gallery.GalleryViewModel
+import com.miguel.economic.receipt.ReceiptViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
-fun koinGalleryModule() = module {
+fun koinReceiptModule() = module {
     single<CoroutineDispatcher> { Dispatchers.IO }
-    viewModelOf(::GalleryViewModel)
+    viewModelOf(::ReceiptViewModel)
 }

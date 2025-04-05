@@ -7,7 +7,12 @@ class GetReceiptUseCase(
     private val receiptRepository: ReceiptRepository
 ) {
 
-    suspend operator fun invoke(): ReceiptModel {
-        return TODO()
+    suspend operator fun invoke(id: Int): ReceiptModel {
+        return ReceiptModel(
+            photoFilename = "",
+            amount = 1,
+            currencyCode = "asdsa",
+            createdDate = "adsdas"
+        )
     }
 }

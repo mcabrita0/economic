@@ -47,7 +47,7 @@ dependencies {
     implementation(project(":core"))
     implementation(project(":domain"))
     implementation(project(":data"))
-    implementation(project(":feature:camera"))
+    implementation(project(":feature:receipt"))
     implementation(project(":feature:gallery"))
 
     implementation(project.dependencies.platform(libs.koin.bom))

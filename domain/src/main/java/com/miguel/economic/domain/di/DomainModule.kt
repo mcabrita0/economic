@@ -1,5 +1,7 @@
 package com.miguel.economic.domain.di
 
+import com.miguel.economic.domain.usecase.CreatePhotoFileUseCase
+import com.miguel.economic.domain.usecase.CreateReceiptUseCase
 import com.miguel.economic.domain.usecase.GetReceiptUseCase
 import com.miguel.economic.domain.usecase.GetReceiptsUseCase
 import kotlinx.coroutines.CoroutineDispatcher
@@ -11,4 +13,6 @@ fun koinDomainModule() = module {
     single<CoroutineDispatcher> { Dispatchers.IO }
     factoryOf(::GetReceiptUseCase)
     factoryOf(::GetReceiptsUseCase)
+    factoryOf(::CreatePhotoFileUseCase)
+    factoryOf(::CreateReceiptUseCase)
 }

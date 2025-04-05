@@ -19,4 +19,12 @@ internal class ReceiptRepositoryImpl : ReceiptRepository {
     override fun getReceipt(id: Int): ReceiptModel {
         TODO("Not yet implemented")
     }
+
+    override fun createReceipt(receipt: ReceiptModel) {
+        TODO("Not yet implemented")
+    }
+
+    override fun updateReceipt(receipt: ReceiptModel) {
+        TODO("Not yet implemented")
+    }
 }
