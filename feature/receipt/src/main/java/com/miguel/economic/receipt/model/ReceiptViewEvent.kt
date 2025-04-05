@@ -9,4 +9,6 @@ internal sealed class ReceiptViewEvent {
     data object SaveAndExit : ReceiptViewEvent()
 
     data object Back : ReceiptViewEvent()
+
+    data class Error(val message: String) : ReceiptViewEvent()
 }

@@ -1,5 +1,6 @@
 package com.miguel.economic.receipt
 
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
@@ -24,10 +26,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.core.net.toUri
 import coil3.compose.AsyncImage
 import com.miguel.economic.core.R
@@ -35,8 +42,10 @@ import com.miguel.economic.core.compose.ViewEventEffect
 import com.miguel.economic.core.navigation.GalleryDestination
 import com.miguel.economic.core.navigation.NavigationDestination
 import com.miguel.economic.core.navigation.ReceiptDestination
+import com.miguel.economic.receipt.model.CurrencyDialogUiState
 import com.miguel.economic.receipt.model.ReceiptUiState
 import com.miguel.economic.receipt.model.ReceiptViewEvent
+import com.miguel.economic.receipt.ui.CurrencyDialog
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -48,14 +57,25 @@ fun ReceiptScreen(
     val viewModel = koinViewModel<ReceiptViewModel> { parametersOf(args) }
     val takePicture = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture(), viewModel::onPhotoTaken)
 
+    val context = LocalContext.current
+
     ViewEventEffect(viewModel.viewEvent) { event ->
         when (event) {
             is ReceiptViewEvent.TakePicture -> {
                 takePicture.launch(event.filename.toUri())
             }
 
-            is ReceiptViewEvent.SaveAndExit, is ReceiptViewEvent.Back -> {
+            is ReceiptViewEvent.SaveAndExit -> {
+                Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show()
                 onNavigate(GalleryDestination)
+            }
+
+            is ReceiptViewEvent.Back -> {
+                onNavigate(GalleryDestination)
+            }
+
+            is ReceiptViewEvent.Error -> {
+                Toast.makeText(context, "ERROR: ${event.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -66,10 +86,28 @@ fun ReceiptScreen(
 
         when (val state = uiState) {
             is ReceiptUiState.Loading -> {
-
+                // TODO: do
             }
 
             is ReceiptUiState.Success -> {
+                val currencyDialogUiState by viewModel.currencyDialogUiState.collectAsState()
+
+                (currencyDialogUiState as? CurrencyDialogUiState.Show)?.let { dialogUiState ->
+                    Dialog(
+                        onDismissRequest = viewModel::onCurrencyDialogDismiss,
+                        properties = DialogProperties()
+                    ) {
+                        CurrencyDialog(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(color = Color.White),
+                            onAmountChange = viewModel::onCurrencyAmountChange,
+                            onCurrencyCodeChange = viewModel::onCurrencyCodeChange,
+                            data = dialogUiState
+                        )
+                    }
+                }
+
                 Column(
                     modifier = Modifier.fillMaxSize()
                 ) {
@@ -97,20 +135,35 @@ fun ReceiptScreen(
                         )
                     }
 
-                    val items = remember(state.receipt) {
-                        listOf(
-                            "Amount" to state.receipt.amount?.toString().orEmpty(),
-                            "Currency" to state.receipt.currencyCode.orEmpty(),
-                            "Created" to state.receipt.formattedDate
-                        )
-                    }
+                    Text(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable(
+                                onClick = viewModel::onClickCurrency,
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = ripple()
+                            )
+                            .padding(all = 8.dp),
+                        text = if (state.receipt.amount.isNotEmpty() && state.receipt.currencyCode.isNotEmpty()) {
+                            state.receipt.formattedAmount
+                        } else {
+                            "No currency"
+                        },
+                        fontSize = 32.sp
+                    )
 
-                    for ((title, value) in items) {
-                        DataItem(
-                            modifier = Modifier.padding(all = 8.dp),
-                            title = title,
-                            value = value
-                        )
+                    if (state.receipt.createdDate != null) {
+                        Row(modifier = Modifier.padding(all = 8.dp)) {
+                            Text(
+                                text = "Created",
+                                fontWeight = FontWeight.Bold
+                            )
+
+                            Text(
+                                modifier = Modifier.padding(start = 16.dp),
+                                text = state.receipt.formattedDate
+                            )
+                        }
                     }
                 }
 
@@ -138,24 +191,5 @@ fun ReceiptScreen(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun DataItem(
-    modifier: Modifier = Modifier,
-    title: String,
-    value: String
-) {
-    Row(modifier) {
-        Text(
-            text = title,
-            fontWeight = FontWeight.Bold
-        )
-
-        Text(
-            modifier = Modifier.padding(start = 16.dp),
-            text = value
-        )
     }
 }

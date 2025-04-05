@@ -1,18 +1,17 @@
 package com.miguel.economic.gallery.ui
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -25,31 +24,32 @@ internal fun GalleryItem(
     modifier: Modifier = Modifier,
     data: ReceiptViewData
 ) {
-    Row(modifier = modifier) {
+    Row(modifier = modifier.height(120.dp)) {
         AsyncImage(
-            modifier = Modifier.size(120.dp),
+            modifier = Modifier.width(120.dp),
             model = data.photoFilename,
             contentScale = ContentScale.FillWidth,
             contentDescription = null,
-            placeholder = if (LocalInspectionMode.current) {
-                rememberVectorPainter(ImageVector.vectorResource(R.drawable.ic_image_placeholder))
-            } else {
-                null
-            }
+            placeholder = painterResource(R.drawable.ic_image_placeholder)
         )
 
         Column(
             modifier = Modifier
                 .weight(1f)
                 .padding(start = 8.dp),
-            verticalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
+                modifier = Modifier.padding(top = 4.dp),
                 text = data.amount,
                 fontSize = 32.sp
             )
 
+            Spacer(modifier = Modifier.weight(1f))
+
             Text(
+                modifier = Modifier
+                    .padding(end = 8.dp, bottom = 4.dp)
+                    .align(Alignment.End),
                 text = data.createdDate,
                 fontSize = 12.sp
             )

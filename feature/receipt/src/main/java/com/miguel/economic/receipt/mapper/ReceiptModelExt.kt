@@ -6,18 +6,22 @@ import com.miguel.economic.receipt.model.ReceiptViewData
 
 internal fun ReceiptModel.toViewData() = ReceiptViewData(
     photoFilename = photoFilename,
-    amount = amount,
+    amount = amount.toString(),
     currencyCode = currencyCode,
     createdDate = createdDate
 )
 
 @SuppressLint("NewApi")
 internal fun ReceiptViewData.toModel(id: Int?): ReceiptModel? {
+    if (photoFilename == null || amount.isEmpty() || currencyCode.isEmpty() || createdDate == null) {
+        return null
+    }
+
     return ReceiptModel(
         id = id,
-        photoFilename = photoFilename ?: return null,
-        amount = amount ?: 0, //?: return null,
-        currencyCode = currencyCode.orEmpty(), //?: return null,
-        createdDate = createdDate ?: return null
+        photoFilename = photoFilename,
+        amount = amount.toFloatOrNull() ?: return null,
+        currencyCode = currencyCode,
+        createdDate = createdDate
     )
 }

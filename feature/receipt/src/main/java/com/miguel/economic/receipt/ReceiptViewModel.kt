@@ -4,11 +4,13 @@ import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.miguel.economic.core.navigation.ReceiptDestination
+import com.miguel.economic.core.util.CurrencyUtil
 import com.miguel.economic.domain.usecase.CreateOrUpdateReceiptUseCase
 import com.miguel.economic.domain.usecase.CreatePhotoFileUseCase
 import com.miguel.economic.domain.usecase.GetReceiptUseCase
 import com.miguel.economic.receipt.mapper.toModel
 import com.miguel.economic.receipt.mapper.toViewData
+import com.miguel.economic.receipt.model.CurrencyDialogUiState
 import com.miguel.economic.receipt.model.ReceiptUiState
 import com.miguel.economic.receipt.model.ReceiptViewData
 import com.miguel.economic.receipt.model.ReceiptViewEvent
@@ -36,6 +38,9 @@ internal class ReceiptViewModel(
 
     private val _viewEvent = Channel<ReceiptViewEvent>()
     val viewEvent = _viewEvent.receiveAsFlow()
+
+    private val _currencyDialogUiState = MutableStateFlow<CurrencyDialogUiState>(CurrencyDialogUiState.Hide)
+    val currencyDialogUiState = _currencyDialogUiState.asStateFlow()
 
     private var pendingPhotoFilename: String? = null
 
@@ -71,11 +76,74 @@ internal class ReceiptViewModel(
 
     fun onClickSave() {
         viewModelScope.launch(ioDispatcher) {
-            createOrUpdateReceiptUseCase(
-                receipt = (_uiState.value as? ReceiptUiState.Success)?.receipt?.toModel(id = args.receiptId) ?: return@launch
-            )
+            val receipt = (_uiState.value as? ReceiptUiState.Success)?.receipt ?: return@launch
 
-            _viewEvent.send(ReceiptViewEvent.SaveAndExit)
+            val receiptModel = receipt.toModel(id = args.receiptId)
+
+            if (receiptModel != null) {
+                createOrUpdateReceiptUseCase(receipt = receiptModel)
+                _viewEvent.send(ReceiptViewEvent.SaveAndExit)
+            } else {
+                val errorMessage = when {
+                    receipt.photoFilename == null -> "No photo taken"
+                    receipt.amount.isEmpty() || receipt.currencyCode.isEmpty() -> "No currency"
+                    receipt.createdDate == null -> "No date set"
+                    else -> null
+                }
+
+                if (errorMessage != null) {
+                    _viewEvent.send(ReceiptViewEvent.Error(message = errorMessage))
+                }
+            }
+        }
+    }
+
+    fun onClickCurrency() {
+        val receipt = (_uiState.value as? ReceiptUiState.Success)?.receipt ?: return
+
+        _currencyDialogUiState.value = CurrencyDialogUiState.Show(
+            currencyCodes = CurrencyUtil.allCurrencyCodes(),
+            currencyCode = receipt.currencyCode,
+            amount = receipt.amount
+        )
+    }
+
+    fun onCurrencyDialogDismiss() {
+        val update = _currencyDialogUiState.value as? CurrencyDialogUiState.Show ?: return
+
+        _uiState.update {
+            (it as? ReceiptUiState.Success)?.copy(
+                receipt = it.receipt.copy(
+                    amount = update.amount,
+                    currencyCode = update.currencyCode
+                )
+            ) ?: it
+        }
+
+        _currencyDialogUiState.value = CurrencyDialogUiState.Hide
+    }
+
+    fun onCurrencyAmountChange(amount: String) {
+        if (amount.toFloatOrNull() == null && amount.isNotEmpty()) {
+            return
+        }
+
+        viewModelScope.launch(ioDispatcher) {
+            _currencyDialogUiState.update {
+                (it as? CurrencyDialogUiState.Show)?.copy(
+                    amount = amount
+                ) ?: it
+            }
+        }
+    }
+
+    fun onCurrencyCodeChange(currencyCode: String) {
+        viewModelScope.launch(ioDispatcher) {
+            _currencyDialogUiState.update {
+                (it as? CurrencyDialogUiState.Show)?.copy(
+                    currencyCode = currencyCode
+                ) ?: it
+            }
         }
     }
 

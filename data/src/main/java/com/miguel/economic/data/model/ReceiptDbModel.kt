@@ -8,7 +8,7 @@ import androidx.room.PrimaryKey
 internal data class ReceiptDbModel(
     @PrimaryKey(autoGenerate = true) val id: Int = ID_AUTO_GENERATE,
     @ColumnInfo(name = "filename") val photoFilename: String,
-    @ColumnInfo(name = "amount") val amount: Int,
+    @ColumnInfo(name = "amount") val amount: Float,
     @ColumnInfo(name = "currency_code") val currencyCode: String,
     @ColumnInfo(name = "created") val created: String
 ) {

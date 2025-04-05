@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatterBuilder
 import java.time.temporal.ChronoField
 
 @SuppressLint("NewApi")
-private object DateUtil {
+object DateUtil {
     val viewDateTimeFormat: DateTimeFormatter by lazy {
         DateTimeFormatterBuilder()
             .parseCaseInsensitive()
