@@ -1,6 +1,5 @@
 package com.miguel.economic.receipt.mapper
 
-import android.annotation.SuppressLint
 import com.miguel.economic.core.util.CurrencyUtil
 import com.miguel.economic.domain.model.ReceiptModel
 import com.miguel.economic.receipt.model.CurrencyDialogUiState
@@ -13,7 +12,6 @@ internal fun ReceiptModel.toViewData() = ReceiptViewData(
     createdDate = createdDate
 )
 
-@SuppressLint("NewApi")
 internal fun ReceiptViewData.toModel(id: Int?): ReceiptModel? {
     if (photoFilename == null || amount.isEmpty() || currencyCode.isEmpty() || createdDate == null) {
         return null
