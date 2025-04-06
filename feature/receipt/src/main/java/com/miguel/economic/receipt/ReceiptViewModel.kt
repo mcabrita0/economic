@@ -48,8 +48,8 @@ internal class ReceiptViewModel(
     private var clickPhotoJob: Job? = null
 
     init {
-        viewModelScope.launch {
-            loadRecipe(id = args.receiptId)
+        viewModelScope.launch(ioDispatcher) {
+            loadReceipt(id = args.receiptId)
         }
     }
 
@@ -58,7 +58,7 @@ internal class ReceiptViewModel(
             return
         }
 
-        viewModelScope.launch(ioDispatcher) {
+        clickPhotoJob = viewModelScope.launch(ioDispatcher) {
             _viewEvent.send(
                 ReceiptViewEvent.TakePicture(
                     filename = createPhotoFileUseCase().also {
@@ -89,12 +89,10 @@ internal class ReceiptViewModel(
                     receipt.photoFilename == null -> R.string.error_no_photo
                     receipt.amount.isEmpty() || receipt.currencyCode.isEmpty() -> R.string.error_no_currency
                     receipt.createdDate == null -> R.string.error_no_date
-                    else -> null
+                    else -> R.string.error_unknown
                 }
 
-                if (errorMessage != null) {
-                    _viewEvent.send(ReceiptViewEvent.Error(message = errorMessage))
-                }
+                _viewEvent.send(ReceiptViewEvent.Error(message = errorMessage))
             }
         }
     }
@@ -176,7 +174,7 @@ internal class ReceiptViewModel(
         }
     }
 
-    private suspend fun loadRecipe(id: Int?) = withContext(ioDispatcher) {
+    private suspend fun loadReceipt(id: Int?) = withContext(ioDispatcher) {
         _uiState.value = ReceiptUiState.Loading
 
         _uiState.value = ReceiptUiState.Success(

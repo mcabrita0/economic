@@ -30,7 +30,7 @@ internal class GalleryViewModel(
     val viewEvent = _viewEvent.receiveAsFlow()
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(ioDispatcher) {
             loadReceipts()
         }
     }

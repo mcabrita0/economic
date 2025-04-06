@@ -10,12 +10,17 @@ import com.miguel.economic.gallery.model.GalleryViewEvent.NavigateCreateReceipt
 import com.miguel.economic.gallery.model.GalleryViewEvent.NavigateReceipt
 import io.mockk.coEvery
 import io.mockk.mockk
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.time.LocalDateTime
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class GalleryViewModelTest {
 
     private val getReceiptsUseCase: GetReceiptsUseCase = mockk(relaxed = true)
@@ -28,10 +33,14 @@ class GalleryViewModelTest {
     private lateinit var viewModel: GalleryViewModel
 
     @Test
-    fun `When ViewModel is initialised then load receipts`() = runTest(dispatcher) {
+    fun `When ViewModel is created then load receipts`() = runTest(dispatcher) {
         // Given
+        val completable = CompletableDeferred<Unit>()
         val receipts = listOf(receipt)
-        coEvery { getReceiptsUseCase() } returns receipts
+        coEvery { getReceiptsUseCase() } coAnswers {
+            completable.await()
+            receipts
+        }
 
         val expected = GalleryUiState.Success(items = receipts.map { it.toViewData() })
 
@@ -41,6 +50,7 @@ class GalleryViewModelTest {
         // Then
         viewModel.uiState.test {
             assertEquals(Loading, awaitItem())
+            completable.complete(Unit)
             assertEquals(expected, awaitItem())
         }
     }
@@ -91,10 +101,11 @@ class GalleryViewModelTest {
         }
     }
 
-    private fun initViewModel() {
+    private fun TestScope.initViewModel() {
         viewModel = GalleryViewModel(
             getReceiptsUseCase = getReceiptsUseCase,
             ioDispatcher = dispatcher
         )
+        advanceUntilIdle()
     }
 }

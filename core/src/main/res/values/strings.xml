@@ -8,6 +8,7 @@
     <string name="error_no_photo">No photo taken</string>
     <string name="error_no_currency">No currency</string>
     <string name="error_no_date">"No date set</string>
+    <string name="error_unknown">"Unknown</string>
     <string name="saved">Saved</string>
     <string name="error_toast">ERROR: %s</string>
 </resources>
