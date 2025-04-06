@@ -5,10 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.miguel.economic.core.R
 import com.miguel.economic.core.navigation.ReceiptDestination
-import com.miguel.economic.core.util.CurrencyUtil
 import com.miguel.economic.domain.usecase.CreateOrUpdateReceiptUseCase
 import com.miguel.economic.domain.usecase.CreatePhotoFileUseCase
 import com.miguel.economic.domain.usecase.GetReceiptUseCase
+import com.miguel.economic.receipt.mapper.toDialogUiState
 import com.miguel.economic.receipt.mapper.toModel
 import com.miguel.economic.receipt.mapper.toViewData
 import com.miguel.economic.receipt.model.CurrencyDialogUiState
@@ -101,11 +101,7 @@ internal class ReceiptViewModel(
         viewModelScope.launch(ioDispatcher) {
             val receipt = (_uiState.value as? ReceiptUiState.Success)?.receipt ?: return@launch
 
-            _currencyDialogUiState.value = CurrencyDialogUiState.Show(
-                currencyCodes = CurrencyUtil.allCurrencyCodes(),
-                currencyCode = receipt.currencyCode,
-                amount = receipt.amount
-            )
+            _currencyDialogUiState.value = receipt.toDialogUiState()
         }
     }
 
@@ -151,10 +147,10 @@ internal class ReceiptViewModel(
     }
 
     @SuppressLint("NewApi")
-    fun onPhotoTaken(success: Boolean) {
+    fun onPhotoTaken() {
         val filename = pendingPhotoFilename
 
-        if (_uiState.value is ReceiptUiState.Loading || filename == null || !success) {
+        if (_uiState.value is ReceiptUiState.Loading || filename == null) {
             pendingPhotoFilename = null
             return
         }

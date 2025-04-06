@@ -56,7 +56,11 @@ fun ReceiptScreen(
     onNavigate: (NavigationDestination) -> Unit
 ) {
     val viewModel = koinViewModel<ReceiptViewModel> { parametersOf(args) }
-    val takePicture = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture(), viewModel::onPhotoTaken)
+    val takePicture = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success) {
+            viewModel.onPhotoTaken()
+        }
+    }
 
     val context = LocalContext.current
 

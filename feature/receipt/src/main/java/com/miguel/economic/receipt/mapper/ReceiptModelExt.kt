@@ -1,7 +1,9 @@
 package com.miguel.economic.receipt.mapper
 
 import android.annotation.SuppressLint
+import com.miguel.economic.core.util.CurrencyUtil
 import com.miguel.economic.domain.model.ReceiptModel
+import com.miguel.economic.receipt.model.CurrencyDialogUiState
 import com.miguel.economic.receipt.model.ReceiptViewData
 
 internal fun ReceiptModel.toViewData() = ReceiptViewData(
@@ -25,3 +27,9 @@ internal fun ReceiptViewData.toModel(id: Int?): ReceiptModel? {
         createdDate = createdDate
     )
 }
+
+internal fun ReceiptViewData.toDialogUiState() = CurrencyDialogUiState.Show(
+    currencyCodes = CurrencyUtil.allCurrencyCodes(),
+    currencyCode = currencyCode,
+    amount = amount
+)
