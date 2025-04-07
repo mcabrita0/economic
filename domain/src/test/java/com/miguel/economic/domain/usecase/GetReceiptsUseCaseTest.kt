@@ -22,23 +22,30 @@ class GetReceiptsUseCaseTest {
     )
 
     @Test
-    fun `When invoked then return value from repository`() = runTest(dispatcher) {
+    fun `When invoked then return receipts from repository sorted`() = runTest(dispatcher) {
         // Given
-        val receipts = listOf(
-            ReceiptModel(
-                id = 1,
-                photoFilename = "file123",
-                amount = 12.3f,
-                currencyCode = "EUR",
-                createdDate = LocalDateTime.now()
-            )
+        val receiptA = ReceiptModel(
+            id = 1,
+            photoFilename = "file123",
+            amount = 12.3f,
+            currencyCode = "EUR",
+            createdDate = LocalDateTime.MIN
         )
-        coEvery { receiptRepository.getReceipts() } returns receipts
+        val receiptB = ReceiptModel(
+            id = 1,
+            photoFilename = "file222",
+            amount = 14.3f,
+            currencyCode = "EUR",
+            createdDate = LocalDateTime.MAX
+        )
+        coEvery { receiptRepository.getReceipts() } returns listOf(receiptA, receiptB)
+
+        val expected = listOf(receiptB, receiptA)
 
         // When
         val result = getReceiptsUseCase()
 
         // Then
-        assertEquals(receipts, result)
+        assertEquals(expected, result)
     }
 }

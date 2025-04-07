@@ -11,6 +11,6 @@ class GetReceiptsUseCase(
 ) {
 
     suspend operator fun invoke(): List<ReceiptModel> = withContext(dispatcher) {
-        receiptRepository.getReceipts()
+        receiptRepository.getReceipts().sortedByDescending { it.createdDate }
     }
 }

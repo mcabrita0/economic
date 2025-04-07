@@ -1,55 +1,23 @@
 package com.miguel.economic.data.datasource.local
 
-import android.content.Context
-import androidx.room.Dao
-import androidx.room.Database
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
-import androidx.room.Room
-import androidx.room.RoomDatabase
 import com.miguel.economic.data.model.ReceiptDbModel
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 
 internal class ReceiptLocalDataSource(
-    private val context: Context
+    private val receiptDatabase: ReceiptDatabase,
+    private val dispatcher: CoroutineDispatcher
 ) {
 
-    private val database by lazy {
-        Room.databaseBuilder(
-            context,
-            ReceiptDatabase::class.java,
-            "receipt"
-        ).build()
+    suspend fun insertOrUpdate(receipt: ReceiptDbModel) = withContext(dispatcher) {
+        receiptDatabase.receiptDao().insertOrUpdate(receipt)
     }
 
-    fun insertOrUpdate(receipt: ReceiptDbModel) {
-        database.receiptDao().insertOrUpdate(receipt)
+    suspend fun getAll(): List<ReceiptDbModel> = withContext(dispatcher) {
+        receiptDatabase.receiptDao().getAll()
     }
 
-    fun getAll(): List<ReceiptDbModel> {
-        return database.receiptDao().getAll()
+    suspend fun get(id: Int): ReceiptDbModel = withContext(dispatcher) {
+        receiptDatabase.receiptDao().get(id)
     }
-
-    fun get(id: Int): ReceiptDbModel {
-        return database.receiptDao().get(id)
-    }
-}
-
-@Database(entities = [ReceiptDbModel::class], version = 1)
-private abstract class ReceiptDatabase : RoomDatabase() {
-
-    abstract fun receiptDao(): ReceiptDao
-}
-
-@Dao
-private interface ReceiptDao {
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertOrUpdate(receipt: ReceiptDbModel)
-
-    @Query("SELECT * FROM receipt")
-    fun getAll(): List<ReceiptDbModel>
-
-    @Query("SELECT * FROM receipt WHERE id = :id")
-    fun get(id: Int): ReceiptDbModel
 }
