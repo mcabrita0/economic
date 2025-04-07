@@ -7,6 +7,8 @@ import com.miguel.economic.data.repository.CameraRepositoryImpl
 import com.miguel.economic.data.repository.ReceiptRepositoryImpl
 import com.miguel.economic.domain.repository.CameraRepository
 import com.miguel.economic.domain.repository.ReceiptRepository
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
@@ -19,6 +21,8 @@ fun koinDataModule() = module {
             "receipt"
         ).build()
     }
+
+    single<CoroutineDispatcher> { Dispatchers.IO }
 
     singleOf(::ReceiptRepositoryImpl) { bind<ReceiptRepository>() }
     singleOf(::CameraRepositoryImpl) { bind<CameraRepository>() }
