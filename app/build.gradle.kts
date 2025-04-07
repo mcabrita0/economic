@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.miguel.economic"
-    compileSdk = 35
+    compileSdk = Versions.COMPILE_SDK
 
     defaultConfig {
         applicationId = "com.miguel.economic"

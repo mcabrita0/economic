@@ -26,7 +26,7 @@ dependencies {
 
 android {
     namespace = "com.miguel.economic.data"
-    compileSdk = 35 // TODO: fix
+    compileSdk = Versions.COMPILE_SDK
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
