@@ -12,6 +12,10 @@ object CurrencyUtil {
             .let { listOf("EUR") + it }
             .distinct()
     }
+
+    fun formatCurrency(amount: Float, currencyCode: String): String {
+        return "%.2f %s".format(amount, currencyCode.currencySymbol.orEmpty())
+    }
 }
 
 
