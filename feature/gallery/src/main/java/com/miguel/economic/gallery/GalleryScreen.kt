@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.miguel.economic.core.R
@@ -33,6 +34,7 @@ import com.miguel.economic.core.navigation.NavigationDestination
 import com.miguel.economic.core.navigation.ReceiptDestination
 import com.miguel.economic.gallery.model.GalleryUiState
 import com.miguel.economic.gallery.model.GalleryViewEvent
+import com.miguel.economic.gallery.model.ReceiptViewData
 import com.miguel.economic.gallery.ui.GalleryItem
 import org.koin.androidx.compose.koinViewModel
 
@@ -51,36 +53,64 @@ fun GalleryScreen(
         }
     }
 
-    Box(modifier = Modifier.background(Color.White)) {
-        when (val state = uiState) {
-            is GalleryUiState.Loading -> {
-                Text(
-                    modifier = Modifier.align(Alignment.Center),
-                    text = stringResource(R.string.loading),
-                    fontSize = 24.sp
-                )
-            }
+    when (val state = uiState) {
+        is GalleryUiState.Loading -> {
+            GalleryScreenLoading()
+        }
 
-            is GalleryUiState.Success -> {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    items(state.items) { data ->
-                        GalleryItem(
-                            modifier = Modifier
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(size = 8.dp))
-                                .background(Color.LightGray)
-                                .clickable(
-                                    onClick = { viewModel.onClickReceipt(data) },
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    indication = ripple()
-                                ),
-                            data = data
-                        )
-                    }
-                }
+        is GalleryUiState.Success -> {
+            GalleryScreenSuccess(
+                state = state,
+                onClickReceipt = viewModel::onClickReceipt,
+                onClickAddReceipt = viewModel::onClickAddReceipt
+            )
+        }
+    }
+}
+
+@Composable
+private fun GalleryScreenLoading() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+        Text(
+            modifier = Modifier.align(Alignment.Center),
+            text = stringResource(R.string.loading),
+            fontSize = 24.sp
+        )
+    }
+}
+
+@Composable
+private fun GalleryScreenSuccess(
+    onClickReceipt: (ReceiptViewData) -> Unit = {},
+    onClickAddReceipt: () -> Unit = {},
+    state: GalleryUiState.Success
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            items(state.items) { data ->
+                GalleryItem(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(size = 8.dp))
+                        .background(Color.LightGray)
+                        .clickable(
+                            onClick = { onClickReceipt(data) },
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = ripple()
+                        ),
+                    data = data
+                )
             }
         }
 
@@ -88,7 +118,7 @@ fun GalleryScreen(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp),
-            onClick = viewModel::onClickAddReceipt
+            onClick = onClickAddReceipt
         ) {
             Icon(
                 imageVector = Icons.Filled.Add,
@@ -96,5 +126,28 @@ fun GalleryScreen(
             )
         }
     }
+}
+
+@Preview
+@Composable
+private fun GalleryScreenLoadingPreview() {
+    GalleryScreenLoading()
+}
+
+@Preview
+@Composable
+private fun GalleryScreenSuccessPreview() {
+    GalleryScreenSuccess(
+        state = GalleryUiState.Success(
+            items = listOf(
+                ReceiptViewData(
+                    id = 1,
+                    photoFilename = "",
+                    amount = "12.5",
+                    createdDate = "2025-04-07 10:36:00"
+                )
+            )
+        )
+    )
 }
 

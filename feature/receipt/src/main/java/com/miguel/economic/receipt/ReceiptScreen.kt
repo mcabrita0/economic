@@ -1,5 +1,6 @@
 package com.miguel.economic.receipt
 
+import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -32,6 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -43,12 +45,15 @@ import com.miguel.economic.core.compose.ViewEventEffect
 import com.miguel.economic.core.navigation.GalleryDestination
 import com.miguel.economic.core.navigation.NavigationDestination
 import com.miguel.economic.core.navigation.ReceiptDestination
+import com.miguel.economic.core.util.CurrencyUtil
 import com.miguel.economic.receipt.model.CurrencyDialogUiState
 import com.miguel.economic.receipt.model.ReceiptUiState
+import com.miguel.economic.receipt.model.ReceiptViewData
 import com.miguel.economic.receipt.model.ReceiptViewEvent
 import com.miguel.economic.receipt.ui.CurrencyDialog
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
+import java.time.LocalDateTime
 
 @Composable
 fun ReceiptScreen(
@@ -89,118 +94,201 @@ fun ReceiptScreen(
 
     val uiState by viewModel.uiState.collectAsState()
 
-    Box(modifier = Modifier.background(Color.White)) {
+    when (val state = uiState) {
+        is ReceiptUiState.Loading -> {
+            ReceiptScreenLoading()
+        }
 
-        when (val state = uiState) {
-            is ReceiptUiState.Loading -> {
-                Text(
-                    modifier = Modifier.align(Alignment.Center),
-                    text = stringResource(R.string.loading),
-                    fontSize = 24.sp
+        is ReceiptUiState.Success -> {
+            val currencyDialogUiState by viewModel.currencyDialogUiState.collectAsState()
+
+            ReceiptScreenSuccess(
+                onCurrencyDialogDismiss = viewModel::onCurrencyDialogDismiss,
+                onCurrencyAmountChange = viewModel::onCurrencyAmountChange,
+                onCurrencyCodeChange = viewModel::onCurrencyCodeChange,
+                onClickBack = viewModel::onClickBack,
+                onClickCurrency = viewModel::onClickCurrency,
+                onClickPhoto = viewModel::onClickPhoto,
+                onClickSave = viewModel::onClickSave,
+                currencyDialogUiState = currencyDialogUiState as? CurrencyDialogUiState.Show,
+                state = state
+            )
+        }
+    }
+}
+
+@Composable
+private fun ReceiptScreenLoading() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+        Text(
+            modifier = Modifier.align(Alignment.Center),
+            text = stringResource(R.string.loading),
+            fontSize = 24.sp
+        )
+    }
+}
+
+@Composable
+private fun ReceiptScreenSuccess(
+    onCurrencyDialogDismiss: () -> Unit = {},
+    onCurrencyAmountChange: (String) -> Unit = {},
+    onCurrencyCodeChange: (String) -> Unit = {},
+    onClickBack: () -> Unit = {},
+    onClickCurrency: () -> Unit = {},
+    onClickPhoto: () -> Unit = {},
+    onClickSave: () -> Unit = {},
+    currencyDialogUiState: CurrencyDialogUiState.Show?,
+    state: ReceiptUiState.Success
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+        if (currencyDialogUiState != null) {
+            Dialog(
+                onDismissRequest = onCurrencyDialogDismiss,
+                properties = DialogProperties()
+            ) {
+                CurrencyDialog(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(color = Color.White),
+                    onAmountChange = onCurrencyAmountChange,
+                    onCurrencyCodeChange = onCurrencyCodeChange,
+                    data = currencyDialogUiState
+                )
+            }
+        }
+
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Box {
+                AsyncImage(
+                    modifier = Modifier
+                        .padding(bottom = 8.dp)
+                        .fillMaxWidth(),
+                    model = state.receipt.photoFilename,
+                    contentDescription = null,
+                    fallback = painterResource(R.drawable.ic_image_placeholder),
+                )
+
+                Icon(
+                    modifier = Modifier
+                        .padding(all = 8.dp)
+                        .clickable(
+                            onClick = onClickBack,
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = ripple(bounded = false)
+                        )
+                        .padding(all = 8.dp),
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = null
                 )
             }
 
-            is ReceiptUiState.Success -> {
-                val currencyDialogUiState by viewModel.currencyDialogUiState.collectAsState()
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(
+                        onClick = onClickCurrency,
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = ripple()
+                    )
+                    .padding(all = 8.dp),
+                text = if (state.receipt.amount.isNotEmpty() && state.receipt.currencyCode.isNotEmpty()) {
+                    state.receipt.formattedAmount
+                } else {
+                    stringResource(R.string.no_currency)
+                },
+                fontSize = 32.sp
+            )
 
-                (currencyDialogUiState as? CurrencyDialogUiState.Show)?.let { dialogUiState ->
-                    Dialog(
-                        onDismissRequest = viewModel::onCurrencyDialogDismiss,
-                        properties = DialogProperties()
-                    ) {
-                        CurrencyDialog(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(color = Color.White),
-                            onAmountChange = viewModel::onCurrencyAmountChange,
-                            onCurrencyCodeChange = viewModel::onCurrencyCodeChange,
-                            data = dialogUiState
-                        )
-                    }
-                }
-
-                Column(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    Box {
-                        AsyncImage(
-                            modifier = Modifier
-                                .padding(bottom = 8.dp)
-                                .fillMaxWidth(),
-                            model = state.receipt.photoFilename,
-                            contentDescription = null,
-                            fallback = painterResource(R.drawable.ic_image_placeholder),
-                        )
-
-                        Icon(
-                            modifier = Modifier
-                                .padding(all = 8.dp)
-                                .clickable(
-                                    onClick = viewModel::onClickBack,
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    indication = ripple(bounded = false)
-                                )
-                                .padding(all = 8.dp),
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = null
-                        )
-                    }
-
+            if (state.receipt.createdDate != null) {
+                Row(modifier = Modifier.padding(all = 8.dp)) {
                     Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable(
-                                onClick = viewModel::onClickCurrency,
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = ripple()
-                            )
-                            .padding(all = 8.dp),
-                        text = if (state.receipt.amount.isNotEmpty() && state.receipt.currencyCode.isNotEmpty()) {
-                            state.receipt.formattedAmount
-                        } else {
-                            stringResource(R.string.no_currency)
-                        },
-                        fontSize = 32.sp
+                        text = stringResource(R.string.created),
+                        fontWeight = FontWeight.Bold
                     )
 
-                    if (state.receipt.createdDate != null) {
-                        Row(modifier = Modifier.padding(all = 8.dp)) {
-                            Text(
-                                text = stringResource(R.string.created),
-                                fontWeight = FontWeight.Bold
-                            )
-
-                            Text(
-                                modifier = Modifier.padding(start = 16.dp),
-                                text = state.receipt.formattedDate
-                            )
-                        }
-                    }
-                }
-
-                Column(modifier = Modifier.align(Alignment.BottomEnd)) {
-                    FloatingActionButton(
-                        modifier = Modifier
-                            .align(Alignment.End)
-                            .padding(16.dp),
-                        onClick = viewModel::onClickPhoto
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_camera),
-                            contentDescription = null
-                        )
-                    }
-
-                    Button(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .fillMaxWidth(),
-                        onClick = viewModel::onClickSave
-                    ) {
-                        Text(text = stringResource(R.string.save))
-                    }
+                    Text(
+                        modifier = Modifier.padding(start = 16.dp),
+                        text = state.receipt.formattedDate
+                    )
                 }
             }
         }
+
+        Column(modifier = Modifier.align(Alignment.BottomEnd)) {
+            FloatingActionButton(
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .padding(16.dp),
+                onClick = onClickPhoto
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_camera),
+                    contentDescription = null
+                )
+            }
+
+            Button(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth(),
+                onClick = onClickSave
+            ) {
+                Text(text = stringResource(R.string.save))
+            }
+        }
     }
+}
+
+@Preview
+@Composable
+private fun ReceiptScreenLoadingPreview() {
+    ReceiptScreenLoading()
+}
+
+@SuppressLint("NewApi")
+@Preview
+@Composable
+private fun ReceiptScreenSuccessPreview() {
+    ReceiptScreenSuccess(
+        currencyDialogUiState = null,
+        state = ReceiptUiState.Success(
+            receipt = ReceiptViewData(
+                photoFilename = null,
+                amount = "123.00",
+                currencyCode = "EUR",
+                createdDate = LocalDateTime.now()
+            )
+        )
+    )
+}
+
+@SuppressLint("NewApi")
+@Preview
+@Composable
+private fun ReceiptScreenSuccessDialogPreview() {
+    ReceiptScreenSuccess(
+        currencyDialogUiState = CurrencyDialogUiState.Show(
+            currencyCodes = CurrencyUtil.allCurrencyCodes(),
+            currencyCode = "EUR",
+            amount = "1.25"
+        ),
+        state = ReceiptUiState.Success(
+            receipt = ReceiptViewData(
+                photoFilename = null,
+                amount = "123.00",
+                currencyCode = "EUR",
+                createdDate = LocalDateTime.now()
+            )
+        )
+    )
 }

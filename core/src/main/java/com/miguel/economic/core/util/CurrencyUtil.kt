@@ -18,7 +18,6 @@ object CurrencyUtil {
     }
 }
 
-
 val String.currency
     get() = try {
         Currency.getInstance(this)

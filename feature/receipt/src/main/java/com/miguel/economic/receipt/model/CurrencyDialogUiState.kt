@@ -3,7 +3,7 @@ package com.miguel.economic.receipt.model
 import androidx.compose.runtime.Immutable
 
 @Immutable
-sealed class CurrencyDialogUiState {
+internal sealed class CurrencyDialogUiState {
 
     @Immutable
     data object Hide : CurrencyDialogUiState()

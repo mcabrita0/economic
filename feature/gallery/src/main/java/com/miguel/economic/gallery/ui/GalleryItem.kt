@@ -30,7 +30,8 @@ internal fun GalleryItem(
             model = data.photoFilename,
             contentScale = ContentScale.FillWidth,
             contentDescription = null,
-            placeholder = painterResource(R.drawable.ic_image_placeholder)
+            placeholder = painterResource(R.drawable.ic_image_placeholder),
+            error = painterResource(R.drawable.ic_image_placeholder)
         )
 
         Column(
